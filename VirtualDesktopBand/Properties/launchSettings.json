@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "VirtualDesktopBand (Package)": {
+      "commandName": "MsixPackage",
+      "doNotLaunchApp": true
+    },
+    "VirtualDesktopBand (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
