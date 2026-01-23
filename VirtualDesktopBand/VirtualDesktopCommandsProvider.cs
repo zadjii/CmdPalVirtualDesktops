@@ -12,14 +12,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using WindowsDesktop;
 
-namespace VirtualDesktopBand;
+namespace Zadjii.CmdPal.VirtualDesktops;
 
-public partial class VirtualDesktopBandCommandsProvider : CommandProvider
+public partial class VirtualDesktopCommandsProvider : CommandProvider
 {
     private readonly ICommandItem[] _commands = [];
     private readonly ICommandItem[] _bands;
 
-    public VirtualDesktopBandCommandsProvider()
+    public VirtualDesktopCommandsProvider()
     {
         DisplayName = "Virtual desktops";
         Icon = Icons.TaskViewIcon;
@@ -142,8 +142,8 @@ public partial class VirtualDesktopsListPage : ListPage
 
         if (!asBand)
         {
-            var hasName = !string.IsNullOrEmpty(desktop.Name);
-            var desktopNumberLabel = $"Desktop {index + 1}";
+            bool hasName = !string.IsNullOrEmpty(desktop.Name);
+            string desktopNumberLabel = $"Desktop {index + 1}";
 
             li.Title = hasName ? desktop.Name : desktopNumberLabel;
             li.Subtitle = hasName ? desktopNumberLabel : string.Empty;

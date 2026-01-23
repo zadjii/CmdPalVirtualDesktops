@@ -9,15 +9,15 @@
   IgnorableNamespaces="uap uap3 rescap">
 
   <Identity
-    Name="VirtualDesktopBand"
-    Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    Name="VirtualDesktopsExtension"
+    Publisher="CN=Michael Griese, O=Michael Griese, L=Verona, S=Wisconsin, C=US"
     Version="0.0.1.0" />
   <!-- When you're ready to publish your extension, you'll need to change the
        Publisher= to match your own identity -->
 
   <Properties>
-    <DisplayName>Deskband for virtual desktops</DisplayName>
-    <PublisherDisplayName>A Lone Developer</PublisherDisplayName>
+    <DisplayName>Virtual desktops for CmdPal</DisplayName>
+    <PublisherDisplayName>zadjii</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -35,8 +35,8 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="Deskband for virtual desktops"
-        Description="Deskband for virtual desktops"
+        DisplayName="Virtual desktops for CmdPal"
+        Description="Virtual desktops for CmdPal"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
@@ -46,8 +46,8 @@
       <Extensions>
         <com:Extension Category="windows.comServer">
           <com:ComServer>
-            <com:ExeServer Executable="VirtualDesktopBand.exe" Arguments="-RegisterProcessAsComServer" DisplayName="Deskband for virtual desktops">
-              <com:Class Id="f1270cad-9bc8-45c2-83a9-bee1cc52b60d" DisplayName="Deskband for virtual desktops" />
+            <com:ExeServer Executable="VirtualDesktopsExtension.exe" Arguments="-RegisterProcessAsComServer" DisplayName="Virtual desktops for CmdPal">
+              <com:Class Id="f1270cad-9bc8-45c2-83a9-bee1cc52b60d" DisplayName="Virtual desktops for CmdPal" />
             </com:ExeServer>
           </com:ComServer>
         </com:Extension>
@@ -55,8 +55,8 @@
           <uap3:AppExtension Name="com.microsoft.commandpalette"
             Id="ID"
             PublicFolder="Public"
-            DisplayName="Deskband for virtual desktops"
-            Description="Deskband for virtual desktops">
+            DisplayName="Virtual desktops for CmdPal"
+            Description="Virtual desktops for CmdPal">
             <uap3:Properties>
               <CmdPalProvider>
                 <Activation>

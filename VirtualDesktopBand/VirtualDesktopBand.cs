@@ -7,14 +7,14 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.CommandPalette.Extensions;
 
-namespace VirtualDesktopBand;
+namespace Zadjii.CmdPal.VirtualDesktops;
 
 [Guid("f1270cad-9bc8-45c2-83a9-bee1cc52b60d")]
 public sealed partial class VirtualDesktopBand : IExtension, IDisposable
 {
     private readonly ManualResetEvent _extensionDisposedEvent;
 
-    private readonly VirtualDesktopBandCommandsProvider _provider = new();
+    private readonly VirtualDesktopCommandsProvider _provider = new();
 
     public VirtualDesktopBand(ManualResetEvent extensionDisposedEvent)
     {

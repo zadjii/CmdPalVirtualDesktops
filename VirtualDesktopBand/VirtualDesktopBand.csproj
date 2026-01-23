@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>VirtualDesktopBand</RootNamespace>
+    <RootNamespace>Zadjii.CmdPal.VirtualDesktops</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
 
     <WindowsSdkPackageVersion>10.0.26100.68-preview</WindowsSdkPackageVersion>
@@ -13,6 +13,8 @@
     <PublishProfile>win-$(Platform).pubxml</PublishProfile>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
+
+		<AssemblyName>VirtualDesktopsExtension</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

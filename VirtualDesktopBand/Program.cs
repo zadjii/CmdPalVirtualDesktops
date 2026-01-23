@@ -8,7 +8,7 @@ using Shmuelie.WinRTServer.CsWinRT;
 using System;
 using System.Threading;
 
-namespace VirtualDesktopBand;
+namespace Zadjii.CmdPal.VirtualDesktops;
 
 public class Program
 {
