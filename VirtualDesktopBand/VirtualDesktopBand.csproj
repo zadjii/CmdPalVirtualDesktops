@@ -96,4 +96,13 @@
   </PropertyGroup>
 
 
+
+	<Target Name="KillRunningExecutable" BeforeTargets="Build;Deploy;Publish">
+		<PropertyGroup>
+			<ExecutableName>$(AssemblyName).exe</ExecutableName>
+		</PropertyGroup>
+
+		<Exec Command="taskkill /F /IM $(ExecutableName)" ContinueOnError="true" IgnoreExitCode="true" />
+	</Target>
+
 </Project>

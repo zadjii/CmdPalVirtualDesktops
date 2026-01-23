@@ -16,14 +16,18 @@ namespace VirtualDesktopBand;
 
 public partial class VirtualDesktopBandCommandsProvider : CommandProvider
 {
-    private readonly ICommandItem[] _commands;
+    private readonly ICommandItem[] _commands = [];
+    private readonly ICommandItem[] _bands;
 
     public VirtualDesktopBandCommandsProvider()
     {
-        DisplayName = "Deskband for virtual desktops";
-        Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png");
+        DisplayName = "Virtual desktops";
+        Icon = Icons.TaskViewIcon;
         _commands = [
-            new CommandItem(new VirtualDesktopsListPage()) { Title = DisplayName },
+            new CommandItem(new VirtualDesktopsListPage(asBand: false)) { Title = DisplayName },
+        ];
+        _bands = [
+            new CommandItem(new VirtualDesktopsListPage(asBand: true)) { Title = DisplayName },
         ];
     }
 
@@ -31,27 +35,39 @@ public partial class VirtualDesktopBandCommandsProvider : CommandProvider
     {
         return _commands;
     }
+    public override ICommandItem[]? GetDockBands()
+    {
+        return _bands;
+    }
 
 }
 
-
-public partial class VirtualDesktopsListPage : ListPage
+public static class Icons
 {
-    //private DispatcherQueue _queue = DispatcherQueue.GetForCurrentThread();
-    TaskScheduler _scheduler;//  = TaskScheduler.Current;// TaskScheduler.FromCurrentSynchronizationContext();
-
-    public override string Id => "com.zadjii.virtualDesktops.band";
+    public static readonly IconInfo TaskViewIcon = new("\uE7C4");
 
     public static readonly IconInfo CheckboxEmptyIcon = new("\uE739");
     public static readonly IconInfo CheckboxFillIcon = new("\uE73B");
     public static readonly IconInfo ToggleFilledIcon = new("\uEC11");
     public static readonly IconInfo StatusCircleIcon = new("\uEA81");
     public static readonly IconInfo CircleFillBadge12Icon = new("\uEDB0");
+}
+
+public partial class VirtualDesktopsListPage : ListPage
+{
+    TaskScheduler _scheduler;
+
+    public override string Id => "com.zadjii.virtualDesktops";
+    public override IconInfo Icon => Icons.TaskViewIcon;
+
+    public static readonly Tag CurrentDesktopTag = new("Current");
 
     private VirtualDesktop[] _desktops;
+    private readonly bool _asBand;
 
-    public VirtualDesktopsListPage()
+    public VirtualDesktopsListPage(bool asBand)
     {
+        _asBand = asBand;
         _scheduler = TaskScheduler.Current;
 
         VirtualDesktop.CurrentChanged += (_, args) => UpdateDesktopsOffUiThread();
@@ -59,22 +75,20 @@ public partial class VirtualDesktopsListPage : ListPage
 
         _desktops = VirtualDesktop.GetDesktops();
 
+        ShowDetails = !_asBand;
     }
 
     public override IListItem[] GetItems()
     {
         VirtualDesktop[] desktops = [];
 
-
-
-        //Logger.LogDebug("VirtualDesktopsListPage.GetItems");
-        //VirtualDesktop[] desktops = VirtualDesktop.GetDesktops();
         List<IListItem> items = new(_desktops.Length);
         DebugPrint($"Current desktop is {VirtualDesktop.Current}");
-        foreach (VirtualDesktop desktop in _desktops)
-        {
-            items.Add(DesktopToItem(desktop));
 
+        for (int i = 0; i < _desktops.Length; i++)
+        {
+            VirtualDesktop desktop = _desktops[i];
+            items.Add(DesktopToItem(desktop, _asBand, i));
         }
         DebugPrint(string.Join(',', items.Select(i => i.Command.ToString())));
         return items.ToArray();
@@ -82,9 +96,6 @@ public partial class VirtualDesktopsListPage : ListPage
 
     private void UpdateDesktopsOffUiThread()
     {
-        //Task.Factory.StartNew(UpdateDesktopsOnUiThread, )
-        //Task.Run(UpdateDesktopsOnUiThread, _scheduler);
-        //_queue.TryEnqueue(UpdateDesktopsOnUiThread);
         Task.Factory.StartNew(UpdateDesktopsOnUiThread,
             CancellationToken.None,
             TaskCreationOptions.None,
@@ -97,7 +108,7 @@ public partial class VirtualDesktopsListPage : ListPage
         RaiseItemsChanged();
     }
 
-    private static IListItem DesktopToItem(VirtualDesktop desktop)
+    private static ListItem DesktopToItem(VirtualDesktop desktop, bool asBand, int index)
     {
         bool isCurrent = desktop == VirtualDesktop.Current;
         if (isCurrent)
@@ -108,19 +119,54 @@ public partial class VirtualDesktopsListPage : ListPage
         {
             DebugPrint($"    - I am NOT current");
         }
+        IconInfo wallpaperIconInfo = new IconInfo(desktop.WallpaperPath);
 
-        return new ListItem(new SwitchToDesktopCommand(desktop, isCurrent))
+        // Possible good icons sets:
+        // * CheckboxFillIcon : CheckboxEmptyIcon for squares
+        // * StatusCircleIcon : CircleFillBadge12Icon for a small circle vs big circle
+        // * ToggleFilledIcon : CircleFillBadge12Icon for big oval vs circle
+        // * wallpaperIconInfo : CircleFillBadge12Icon for wallpaper vs circle
+        //
+        // What we really should have is a setting for 
+        // * active desktop icon
+        // * inactive desktop icon
+
+        IconInfo icon = asBand ?
+            (isCurrent ? Icons.ToggleFilledIcon : Icons.CircleFillBadge12Icon) :
+            wallpaperIconInfo;
+
+        ListItem li = new ListItem(new SwitchToDesktopCommand(desktop, isCurrent, asBand))
         {
-            // Icon = isCurrent ? CheckboxFillIcon : CheckboxEmptyIcon
-            Icon = isCurrent ? ToggleFilledIcon : CircleFillBadge12Icon
-            //Icon = isCurrent ? new(desktop.WallpaperPath) : CircleFillBadge12Icon
+            Icon = icon,
         };
+
+        if (!asBand)
+        {
+            var hasName = !string.IsNullOrEmpty(desktop.Name);
+            var desktopNumberLabel = $"Desktop {index + 1}";
+
+            li.Title = hasName ? desktop.Name : desktopNumberLabel;
+            li.Subtitle = hasName ? desktopNumberLabel : string.Empty;
+            Details details = new Details()
+            {
+                Title = li.Title,
+                HeroImage = icon,
+            };
+            li.Details = details;
+
+            if (isCurrent)
+            {
+                li.Tags = [CurrentDesktopTag];
+            }
+        }
+
+        return li;
     }
 
-    private sealed partial class SwitchToDesktopCommand(VirtualDesktop desktop, bool isCurrent) : InvokableCommand
+    private sealed partial class SwitchToDesktopCommand(VirtualDesktop desktop, bool isCurrent, bool asBand) : InvokableCommand
     {
-        public VirtualDesktop Desktop { get; } = desktop;
-        public override string Name => string.Empty;
+        public VirtualDesktop Desktop => desktop;
+        public override string Name => asBand ? string.Empty : "Switch to desktop";
         internal bool IsCurrent { get; init; } = isCurrent;
         public override string ToString()
         {
