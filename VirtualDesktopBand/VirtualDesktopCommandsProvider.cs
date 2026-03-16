@@ -23,6 +23,7 @@ public partial class VirtualDesktopCommandsProvider : CommandProvider
     {
         DisplayName = "Virtual desktops";
         Icon = Icons.TaskViewIcon;
+        Settings = VirtualDesktopSettings.Instance.Settings;
         _commands = [
             new CommandItem(new VirtualDesktopsListPage(asBand: false)) { Title = DisplayName },
         ];
@@ -72,6 +73,7 @@ public partial class VirtualDesktopsListPage : ListPage
 
         VirtualDesktop.CurrentChanged += (_, args) => UpdateDesktopsOffUiThread();
         VirtualDesktop.Created += (_, desktop) => UpdateDesktopsOffUiThread();
+        VirtualDesktopSettings.Instance.Settings.SettingsChanged += (_, _) => UpdateDesktopsOffUiThread();
 
         _desktops = VirtualDesktop.GetDesktops();
 
@@ -132,7 +134,9 @@ public partial class VirtualDesktopsListPage : ListPage
         // * inactive desktop icon
 
         IconInfo icon = asBand ?
-            (isCurrent ? Icons.ToggleFilledIcon : Icons.CircleFillBadge12Icon) :
+            (isCurrent
+                ? VirtualDesktopSettings.GetIconForValue(VirtualDesktopSettings.Instance.ActiveDesktopIcon, desktop.WallpaperPath)
+                : VirtualDesktopSettings.GetIconForValue(VirtualDesktopSettings.Instance.InactiveDesktopIcon, desktop.WallpaperPath)) :
             wallpaperIconInfo;
 
         ListItem li = new ListItem(new SwitchToDesktopCommand(desktop, isCurrent, asBand))
@@ -168,6 +172,7 @@ public partial class VirtualDesktopsListPage : ListPage
         public VirtualDesktop Desktop => desktop;
         public override string Name => asBand ? string.Empty : "Switch to desktop";
         internal bool IsCurrent { get; init; } = isCurrent;
+        public override string Id => $"com.zadjii.virtualDesktops.switchTo.{Desktop.Id}";
         public override string ToString()
         {
             return $"{(IsCurrent ? "*" : string.Empty)}{Desktop.ToString()}";
