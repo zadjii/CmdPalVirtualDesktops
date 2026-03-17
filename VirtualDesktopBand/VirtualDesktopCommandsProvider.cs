@@ -41,6 +41,20 @@ public partial class VirtualDesktopCommandsProvider : CommandProvider
         return _bands;
     }
 
+    public override ICommandItem? GetCommandItem(string id)
+    {
+        // First check top-level commands.
+        foreach (var li in _commands)
+        {
+            if (li?.Command is ICommand cmd && cmd.Id == id)
+            {
+                return li;
+            }
+        }
+        // don't need to sheck bands, those are the same thing,
+        return null;
+    }
+
 }
 
 public static class Icons
@@ -52,12 +66,16 @@ public static class Icons
     public static readonly IconInfo ToggleFilledIcon = new("\uEC11");
     public static readonly IconInfo StatusCircleIcon = new("\uEA81");
     public static readonly IconInfo CircleFillBadge12Icon = new("\uEDB0");
+
+    public static readonly IconInfo Switchcon = new("\uE8AB"); // Switch
+
 }
 
 public partial class VirtualDesktopsListPage : ListPage
 {
     TaskScheduler _scheduler;
 
+    public override string Name => "Open";
     public override string Id => "com.zadjii.virtualDesktops";
     public override IconInfo Icon => Icons.TaskViewIcon;
 
@@ -139,7 +157,7 @@ public partial class VirtualDesktopsListPage : ListPage
                 : VirtualDesktopSettings.GetIconForValue(VirtualDesktopSettings.Instance.InactiveDesktopIcon, desktop.WallpaperPath)) :
             wallpaperIconInfo;
 
-        ListItem li = new ListItem(new SwitchToDesktopCommand(desktop, isCurrent, asBand))
+        ListItem li = new ListItem(new SwitchToDesktopCommand(desktop, isCurrent, asBand, index))
         {
             Icon = icon,
         };
@@ -167,12 +185,13 @@ public partial class VirtualDesktopsListPage : ListPage
         return li;
     }
 
-    private sealed partial class SwitchToDesktopCommand(VirtualDesktop desktop, bool isCurrent, bool asBand) : InvokableCommand
+    private sealed partial class SwitchToDesktopCommand(VirtualDesktop desktop, bool isCurrent, bool asBand, int index) : InvokableCommand
     {
         public VirtualDesktop Desktop => desktop;
         public override string Name => asBand ? string.Empty : "Switch to desktop";
         internal bool IsCurrent { get; init; } = isCurrent;
-        public override string Id => $"com.zadjii.virtualDesktops.switchTo.{Desktop.Id}";
+        public override string Id => $"com.zadjii.virtualDesktops.switchTo.{index}";
+        public override IconInfo Icon => Icons.Switchcon;
         public override string ToString()
         {
             return $"{(IsCurrent ? "*" : string.Empty)}{Desktop.ToString()}";

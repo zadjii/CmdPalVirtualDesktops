@@ -65,6 +65,8 @@ public class VirtualDesktopSettings : JsonSettingsManager
 
         Settings.Add(_activeDesktopIcon);
         Settings.Add(_inactiveDesktopIcon);
+        // default to pill for the active desktop
+        _activeDesktopIcon.Value = _iconChoices[1].Value;
 
         LoadSettings();
 
