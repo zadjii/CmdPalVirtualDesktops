@@ -13,6 +13,7 @@
     <PublishProfile>win-$(Platform).pubxml</PublishProfile>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 		<AssemblyName>VirtualDesktopsExtension</AssemblyName>
   </PropertyGroup>
@@ -52,6 +53,9 @@
 
 		<PackageReference Include="Slions.VirtualDesktop" />
 
+    <PackageReference Include="Microsoft.Windows.CsWin32">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
 	</ItemGroup>
 
   <!--

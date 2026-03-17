@@ -10,6 +10,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 using WindowsDesktop;
 
 namespace Zadjii.CmdPal.VirtualDesktops;
@@ -68,6 +71,9 @@ public static class Icons
     public static readonly IconInfo CircleFillBadge12Icon = new("\uEDB0");
 
     public static readonly IconInfo Switchcon = new("\uE8AB"); // Switch
+    public static readonly IconInfo SendIcon = new("\uE724"); // Send
+    public static readonly IconInfo NewWindowIcon = new("\uE78B"); // NewWindow
+    
 
 }
 
@@ -157,9 +163,31 @@ public partial class VirtualDesktopsListPage : ListPage
                 : VirtualDesktopSettings.GetIconForValue(VirtualDesktopSettings.Instance.InactiveDesktopIcon, desktop.WallpaperPath)) :
             wallpaperIconInfo;
 
+        List<CommandContextItem> contextItems = [
+            new CommandContextItem(new MoveWindowToDesktopCommand(desktop, index, false))
+            {
+                Title = "Move window here",
+            },
+            new CommandContextItem(new MoveWindowToDesktopCommand(desktop, index, true))
+            {
+                Title = "Move window and switch",
+            },
+        ];
+
+        if (asBand)
+        {
+            // in the band we only show the context menu, not the command in the list item itself
+            contextItems.Insert(0, new CommandContextItem(new SwitchToDesktopCommand(desktop, isCurrent, asBand:false, index))
+            {
+                Title = "Switch to desktop",
+                Icon = Icons.Switchcon,
+            });
+        }
+
         ListItem li = new ListItem(new SwitchToDesktopCommand(desktop, isCurrent, asBand, index))
         {
             Icon = icon,
+            MoreCommands = contextItems.ToArray(),
         };
 
         if (!asBand)
@@ -183,6 +211,93 @@ public partial class VirtualDesktopsListPage : ListPage
         }
 
         return li;
+    }
+
+    private static HWND FindLastNonToolWindow()
+    {
+        HWND found = HWND.Null;
+        uint currentPid = (uint)Environment.ProcessId;
+
+        PInvoke.EnumWindows((hWnd, _) =>
+        {
+            if (!PInvoke.IsWindowVisible(hWnd))
+            {
+                return true; // continue
+            }
+
+            const int WS_EX_TOOLWINDOW = 0x00000080;
+            int exStyle = PInvoke.GetWindowLong(hWnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+            if ((exStyle & WS_EX_TOOLWINDOW) != 0)
+            {
+                return true; // continue
+            }
+
+            // also skip popups
+            const uint WS_POPUP = 0x80000000;
+            int style = PInvoke.GetWindowLong(hWnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE);
+            if ((style & WS_POPUP) != 0)
+            {
+                return true; // continue
+            }
+
+            found = hWnd;
+            return false; // stop
+        }, IntPtr.Zero);
+
+        return found;
+    }
+
+    private sealed partial class MoveWindowToDesktopCommand(VirtualDesktop desktop, int index, bool andSwitchTo) : InvokableCommand
+    {
+        public override string Name => andSwitchTo ? "Move window and switch" : "Move window here";
+        public override string Id => $"com.zadjii.virtualDesktops.moveWindow.{index}";
+        public override IconInfo Icon => andSwitchTo ? Icons.NewWindowIcon : Icons.SendIcon;
+
+        public override ICommandResult Invoke()
+        {
+            try
+            {
+                HWND hWnd = FindLastNonToolWindow();
+                if (hWnd != HWND.Null)
+                {
+                    string title = string.Empty;
+                    var bufferSize = PInvoke.GetWindowTextLength(hWnd) + 1;
+                    unsafe
+                    {
+                        fixed (char* windowNameChars = new char[bufferSize])
+                        {
+                            if (PInvoke.GetWindowText(hWnd, windowNameChars, bufferSize) == 0)
+                            {
+                                title = "<unknown>";
+                            }
+
+                            title = new string(windowNameChars);
+                        }
+                    }
+
+                    DebugPrint($"Moving window {hWnd} ('{title}') to '{desktop}'");
+                    VirtualDesktop.MoveToDesktop(hWnd, desktop);
+                    DebugPrint($"...done");
+
+                    if (andSwitchTo)
+                    {
+                        DebugPrint($"Switching to '{desktop}'");
+                        desktop.Switch();
+                        DebugPrint($"...done");
+                    }
+                }
+                else
+                {
+                    DebugPrint("No eligible window found to move");
+                }
+            }
+            catch (Exception e)
+            {
+                DebugPrint($"MoveWindowToDesktopCommand invoke\n{e.Message}\n{e.StackTrace}");
+            }
+
+            return CommandResult.KeepOpen();
+        }
     }
 
     private sealed partial class SwitchToDesktopCommand(VirtualDesktop desktop, bool isCurrent, bool asBand, int index) : InvokableCommand
