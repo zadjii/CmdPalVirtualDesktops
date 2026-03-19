@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="cmdpal-stable-back" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#003E92" />
+      <stop offset="100%" stop-color="#7A41DC" />
+    </linearGradient>
+    <linearGradient id="cmdpal-stable-front" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4DD2FF" />
+      <stop offset="100%" stop-color="#24CDB9" />
+    </linearGradient>
+  </defs>
+
+  <!-- Back rectangle (lower-left, purple-blue) -->
+  <rect x="8" y="28" width="38" height="28" rx="4" ry="4"
+        fill="url(#cmdpal-stable-back)" />
+
+  <!-- Front rectangle (upper-right, cyan) -->
+  <rect x="18" y="8" width="38" height="28" rx="4" ry="4"
+        fill="url(#cmdpal-stable-front)" />
+</svg>
