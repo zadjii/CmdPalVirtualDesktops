@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="cmdpal-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F7630C" />
+      <stop offset="50%" stop-color="#CA5010" />
+      <stop offset="100%" stop-color="#886CE4" />
+    </linearGradient>
+    <linearGradient id="cmdpal-gradient-front" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#886CE4" />
+      <stop offset="50%" stop-color="#6B4FBB" />
+      <stop offset="100%" stop-color="#4C3D99" />
+    </linearGradient>
+  </defs>
+
+  <!-- Back rectangle (offset up-right) -->
+  <rect x="18" y="8" width="38" height="28" rx="4" ry="4"
+        fill="url(#cmdpal-gradient)" opacity="0.85" />
+
+  <!-- Front rectangle (offset down-left) -->
+  <rect x="8" y="28" width="38" height="28" rx="4" ry="4"
+        fill="url(#cmdpal-gradient-front)" />
+</svg>
