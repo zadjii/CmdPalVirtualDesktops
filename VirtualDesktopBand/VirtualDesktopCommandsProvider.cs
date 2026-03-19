@@ -25,7 +25,8 @@ public partial class VirtualDesktopCommandsProvider : CommandProvider
     public VirtualDesktopCommandsProvider()
     {
         DisplayName = "Virtual desktops";
-        Icon = Icons.TaskViewIcon;
+        Icon = Icons.AppIcon;
+
         Settings = VirtualDesktopSettings.Instance.Settings;
         _commands = [
             new CommandItem(new VirtualDesktopsListPage(asBand: false)) { Title = DisplayName },
@@ -74,7 +75,7 @@ public static class Icons
     public static readonly IconInfo SendIcon = new("\uE724"); // Send
     public static readonly IconInfo NewWindowIcon = new("\uE78B"); // NewWindow
     
-
+    public static readonly IconInfo AppIcon = IconHelpers.FromRelativePath("Assets\\Square44x44Logo.scale-200.png");
 }
 
 public partial class VirtualDesktopsListPage : ListPage

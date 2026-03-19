@@ -16,6 +16,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 		<AssemblyName>VirtualDesktopsExtension</AssemblyName>
+    
+    <GenerateAppxPackageOnBuild Condition="'$(Configuration)'=='Release'">true</GenerateAppxPackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
